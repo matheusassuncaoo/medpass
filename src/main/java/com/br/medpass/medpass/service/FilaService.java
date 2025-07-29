@@ -48,6 +48,20 @@ public class FilaService {
         return filaRepository.save(fila);
     }
 
+    public void desativar(Long id) {
+        Fila fila = filaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Fila não encontrada"));
+        fila.setAtiva(false);
+        filaRepository.save(fila);
+    }
+
+    public void ativar(Long id) {
+        Fila fila = filaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Fila não encontrada"));
+        fila.setAtiva(true);
+        filaRepository.save(fila);
+    }
+
     public void deletar(Long id) {
         if (!filaRepository.existsById(id)) {
             throw new RuntimeException("Fila não encontrada");

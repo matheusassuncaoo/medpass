@@ -3,6 +3,7 @@ package com.br.medpass.medpass.service;
 import com.br.medpass.medpass.model.Senha;
 import com.br.medpass.medpass.model.Fila;
 import com.br.medpass.medpass.model.Paciente;
+import com.br.medpass.medpass.model.Guiche;
 import com.br.medpass.medpass.repository.SenhaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,8 +15,11 @@ import java.util.Optional;
 @Service
 public class SenhaService {
 
-    @Autowired
-    private SenhaRepository senhaRepository;
+    private final SenhaRepository senhaRepository;
+
+    public SenhaService(SenhaRepository senhaRepository) {
+        this.senhaRepository = senhaRepository;
+    }
 
     public List<Senha> listarTodos() {
         return senhaRepository.findAll();
@@ -53,9 +57,32 @@ public class SenhaService {
             senha.setStatus("chamada");
             senha.setDataChamada(LocalDateTime.now());
             // Aqui você pode adicionar a lógica para associar o guichê
+            if (guicheId != null) {
+                Guiche guiche = new Guiche();
+                guiche.setId(guicheId);
+                senha.setGuiche(guiche);
+            }
             return senhaRepository.save(senha);
         }
         throw new RuntimeException("Senha não encontrada");
+    }
+
+    public Senha atenderSenha(Long id) {
+        return senhaRepository.findById(id)
+                .map(senha -> {
+                    senha.setStatus("atendida");
+                    return senhaRepository.save(senha);
+                })
+                .orElseThrow(() -> new RuntimeException("Senha não encontrada"));
+    }
+
+    public Senha cancelarSenha(Long id) {
+        return senhaRepository.findById(id)
+                .map(senha -> {
+                    senha.setStatus("cancelada");
+                    return senhaRepository.save(senha);
+                })
+                .orElseThrow(() -> new RuntimeException("Senha não encontrada"));
     }
 
     public Senha atualizar(Long id, Senha senha) {
@@ -72,4 +99,4 @@ public class SenhaService {
         }
         senhaRepository.deleteById(id);
     }
-} 
+}
